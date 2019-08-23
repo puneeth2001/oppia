@@ -1574,14 +1574,8 @@ class State(object):
                 self.interaction.answer_groups)]
         # TODO(yanamal): Do additional calculations here to get the
         # parameter changes, if necessary.
-        for answer_group_dict in answer_groups_list:
-            answer_group_dict = answer_group_dict.to_dict()
-            rule_specs_list = answer_group_dict['rule_specs']
-            if not isinstance(rule_specs_list, list):
-                raise Exception(
-                    'Expected answer group rule specs to be a list, '
-                    'received %s' % rule_specs_list)
-
+        for answer_group in answer_groups_list:
+            answer_group_dict = answer_group.to_dict()
             answer_group = AnswerGroup(
                 Outcome.from_dict(answer_group_dict['outcome']), [],
                 answer_group_dict['training_data'],

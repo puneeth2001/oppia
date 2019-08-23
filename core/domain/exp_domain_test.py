@@ -523,11 +523,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         })
-        answer_groups_objects_list = []
+        answer_group_objects_list = []
         for answer_group_dict in old_answer_groups:
-            answer_groups_objects_list.append(
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        init_state.update_interaction_answer_groups(answer_groups_objects_list)
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         exploration.validate()
 
@@ -711,11 +711,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
         interaction.id = 'TextInput'
         answer_groups_list = [
             answer_group.to_dict() for answer_group in answer_groups]
-        answer_groups_objects_list = []
+        answer_group_objects_list = []
         for answer_group_dict in answer_groups_list:
-            answer_groups_objects_list.append(
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        init_state.update_interaction_answer_groups(answer_groups_objects_list)
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
         init_state.update_interaction_default_outcome(default_outcome.to_dict())
         exploration.validate()
 
@@ -759,11 +759,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': 1
         }]
-        answer_groups_objects_list = []
+        answer_group_objects_list = []
         for answer_group_dict in answer_groups_list:
-            answer_groups_objects_list.append(
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        init_state.update_interaction_answer_groups(answer_groups_objects_list)
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         self._assert_validation_error(
             exploration,
@@ -791,11 +791,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'tagged_skill_misconception_id':
                 'invalid_tagged_skill_misconception_id'
         }]
-        answer_groups_objects_list = []
+        answer_group_objects_list = []
         for answer_group_dict in answer_groups_list:
-            answer_groups_objects_list.append(
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        init_state.update_interaction_answer_groups(answer_groups_objects_list)
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         self._assert_validation_error(
             exploration,
@@ -1190,7 +1190,7 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
         init_state = exploration.states[exploration.init_state_name]
         init_state.update_interaction_id('TextInput')
 
-        answer_group_list = [{
+        answer_groups_list = [{
             'outcome': {
                 'dest': exploration.init_state_name,
                 'feedback': {
@@ -1211,12 +1211,12 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_group_object_list = []
-        for answer_group_dict in answer_group_list:
-            answer_group_object_list.append(
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups_list:
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict)
             )
-        init_state.update_interaction_answer_groups(answer_group_object_list)
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         hints_list = []
         hints_list.append({
@@ -1552,12 +1552,12 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_groups_objects_list = []
+        answer_group_objects_list = []
         for answer_group_dict in answer_groups:
-            answer_groups_objects_list.append(
+            answer_group_objects_list.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
         exploration.init_state.update_interaction_answer_groups(
-            answer_groups_objects_list)
+            answer_group_objects_list)
         with self.assertRaisesRegexp(
             Exception,
             'The parameter ParamChange was used in an answer group, '
@@ -7539,7 +7539,7 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
 
         state1.update_interaction_solution(solution_dict1)
 
-        answer_group_list2 = [{
+        answer_groups_list2 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': 0}
@@ -7579,7 +7579,7 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_group_list3 = [{
+        answer_groups_list3 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': [
@@ -7605,16 +7605,16 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_group_object_list2 = []
-        answer_group_object_list3 = []
-        for answer_group_dict in answer_group_list2:
-            answer_group_object_list2.append(
+        answer_group_objects_list2 = []
+        answer_group_objects_list3 = []
+        for answer_group_dict in answer_groups_list2:
+            answer_group_objects_list2.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        for answer_group_dict in answer_group_list3:
-            answer_group_object_list3.append(
+        for answer_group_dict in answer_groups_list3:
+            answer_group_objects_list3.append(
                 state_domain.AnswerGroup.from_dict(answer_group_dict))
-        state2.update_interaction_answer_groups(answer_group_object_list2)
-        state3.update_interaction_answer_groups(answer_group_object_list3)
+        state2.update_interaction_answer_groups(answer_group_objects_list2)
+        state3.update_interaction_answer_groups(answer_group_objects_list3)
 
         expected_html_list = [
             '',
