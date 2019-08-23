@@ -1351,7 +1351,7 @@ class GetImageFilenamesFromExplorationTests(ExplorationServicesUnitTests):
         }]
         state2.update_interaction_hints(hint_list2)
 
-        answer_group_list2 = [{
+        answer_groups_list2 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': 0}
@@ -1397,7 +1397,7 @@ class GetImageFilenamesFromExplorationTests(ExplorationServicesUnitTests):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_group_list3 = [{
+        answer_groups_list3 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': [
@@ -1435,8 +1435,16 @@ class GetImageFilenamesFromExplorationTests(ExplorationServicesUnitTests):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        state2.update_interaction_answer_groups(answer_group_list2)
-        state3.update_interaction_answer_groups(answer_group_list3)
+        answer_group_objects_list2 = []
+        for answer_group_dict in answer_groups_list2:
+            answer_group_objects_list2.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        answer_group_objects_list3 = []
+        for answer_group_dict in answer_groups_list3:
+            answer_group_objects_list3.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        state2.update_interaction_answer_groups(answer_group_objects_list2)
+        state3.update_interaction_answer_groups(answer_group_objects_list3)
 
         filenames = (
             exp_services.get_image_filenames_from_exploration(exploration))

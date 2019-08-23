@@ -523,8 +523,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         })
-
-        init_state.update_interaction_answer_groups(old_answer_groups)
+        answer_group_objects_list = []
+        for answer_group_dict in old_answer_groups:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         exploration.validate()
 
@@ -708,7 +711,11 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
         interaction.id = 'TextInput'
         answer_groups_list = [
             answer_group.to_dict() for answer_group in answer_groups]
-        init_state.update_interaction_answer_groups(answer_groups_list)
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups_list:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
         init_state.update_interaction_default_outcome(default_outcome.to_dict())
         exploration.validate()
 
@@ -731,7 +738,7 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
         interaction.hints = []
 
         # Validate AnswerGroup.
-        answer_groups_dict = {
+        answer_groups_list = [{
             'outcome': {
                 'dest': exploration.init_state_name,
                 'feedback': {
@@ -751,14 +758,18 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             }],
             'training_data': [],
             'tagged_skill_misconception_id': 1
-        }
-        init_state.update_interaction_answer_groups([answer_groups_dict])
+        }]
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups_list:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         self._assert_validation_error(
             exploration,
             'Expected tagged skill misconception id to be a str, received 1')
 
-        answer_groups_dict = {
+        answer_groups_list = [{
             'outcome': {
                 'dest': exploration.init_state_name,
                 'feedback': {
@@ -779,8 +790,12 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id':
                 'invalid_tagged_skill_misconception_id'
-        }
-        init_state.update_interaction_answer_groups([answer_groups_dict])
+        }]
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups_list:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
 
         self._assert_validation_error(
             exploration,
@@ -1030,6 +1045,199 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
         actual_dict = exploration.get_trainable_states_dict(
             old_states, exp_versions_diff)
         self.assertEqual(actual_dict, expected_dict)
+
+    def test_get_languages_with_complete_translation(self):
+        exploration = exp_domain.Exploration.create_default_exploration('0')
+        self.assertEqual(
+            exploration.get_languages_with_complete_translation(), [])
+        written_translations = state_domain.WrittenTranslations.from_dict({
+            'translations_mapping': {
+                'content_1': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                },
+                'default_outcome': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                }
+            }
+        })
+        exploration.states[
+            feconf.DEFAULT_INIT_STATE_NAME].update_written_translations(
+                written_translations)
+
+        self.assertEqual(
+            exploration.get_languages_with_complete_translation(), ['hi'])
+
+    def test_get_translation_counts_with_no_needs_update(self):
+        exploration = exp_domain.Exploration.create_default_exploration('0')
+        self.assertEqual(
+            exploration.get_translation_counts(), {})
+        written_translations = state_domain.WrittenTranslations.from_dict({
+            'translations_mapping': {
+                'content_1': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                },
+                'default_outcome': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                }
+            }
+        })
+        exploration.states[
+            feconf.DEFAULT_INIT_STATE_NAME].update_written_translations(
+                written_translations)
+
+        exploration.add_states(['New state'])
+        written_translations = state_domain.WrittenTranslations.from_dict({
+            'translations_mapping': {
+                'content_1': {
+                    'hi': {
+                        'html': '<p>New state translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                },
+                'default_outcome': {
+                    'hi': {
+                        'html': '<p>New State translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                }
+            }
+        })
+        exploration.states['New state'].update_written_translations(
+            written_translations)
+
+        self.assertEqual(
+            exploration.get_translation_counts(), {'hi': 4})
+
+    def test_get_translation_counts_with_needs_update(self):
+        exploration = exp_domain.Exploration.create_default_exploration('0')
+        self.assertEqual(
+            exploration.get_translation_counts(), {})
+        written_translations = state_domain.WrittenTranslations.from_dict({
+            'translations_mapping': {
+                'content_1': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': True
+                    }
+                },
+                'default_outcome': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                }
+            }
+        })
+        exploration.states[
+            feconf.DEFAULT_INIT_STATE_NAME].update_written_translations(
+                written_translations)
+
+        self.assertEqual(
+            exploration.get_translation_counts(), {'hi': 1})
+
+    def test_get_translation_counts_with_translation_in_multiple_lang(self):
+        exploration = exp_domain.Exploration.create_default_exploration('0')
+        self.assertEqual(
+            exploration.get_translation_counts(), {})
+        written_translations = state_domain.WrittenTranslations.from_dict({
+            'translations_mapping': {
+                'content_1': {
+                    'hi-en': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    },
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                },
+                'default_outcome': {
+                    'hi': {
+                        'html': '<p>Translation in Hindi.</p>',
+                        'needs_update': False
+                    }
+                }
+            }
+        })
+        exploration.states[
+            feconf.DEFAULT_INIT_STATE_NAME].update_written_translations(
+                written_translations)
+
+        self.assertEqual(
+            exploration.get_translation_counts(), {
+                'hi': 2,
+                'hi-en': 1
+            })
+
+    def test_get_content_count(self):
+        exploration = exp_domain.Exploration.create_default_exploration('0')
+        self.assertEqual(
+            exploration.get_content_count(), 2)
+
+        exploration.add_states(['New state'])
+        init_state = exploration.states[exploration.init_state_name]
+        init_state.update_interaction_id('TextInput')
+
+        answer_groups_list = [{
+            'outcome': {
+                'dest': exploration.init_state_name,
+                'feedback': {
+                    'content_id': 'feedback_1',
+                    'html': '<p>Feedback</p>'
+                },
+                'labelled_as_correct': False,
+                'param_changes': [],
+                'refresher_exploration_id': None,
+                'missing_prerequisite_skill_id': None
+            },
+            'rule_specs': [{
+                'inputs': {
+                    'x': 'Test'
+                },
+                'rule_type': 'Contains'
+            }],
+            'training_data': [],
+            'tagged_skill_misconception_id': None
+        }]
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups_list:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict)
+            )
+        init_state.update_interaction_answer_groups(answer_group_objects_list)
+
+        hints_list = []
+        hints_list.append({
+            'hint_content': {
+                'content_id': 'hint_1',
+                'html': '<p>hint one</p>'
+            },
+        })
+        init_state.update_interaction_hints(hints_list)
+
+        solution = {
+            'answer_is_exclusive': False,
+            'correct_answer': 'helloworld!',
+            'explanation': {
+                'content_id': 'solution',
+                'html': '<p>hello_world is a string</p>'
+            },
+        }
+        init_state.update_interaction_solution(solution)
+
+        self.assertEqual(exploration.get_content_count(), 7)
 
     def test_is_demo_property(self):
         """Test the is_demo property."""
@@ -1344,8 +1552,12 @@ class ExplorationDomainUnitTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-
-        exploration.init_state.update_interaction_answer_groups(answer_groups)
+        answer_group_objects_list = []
+        for answer_group_dict in answer_groups:
+            answer_group_objects_list.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        exploration.init_state.update_interaction_answer_groups(
+            answer_group_objects_list)
         with self.assertRaisesRegexp(
             Exception,
             'The parameter ParamChange was used in an answer group, '
@@ -7221,7 +7433,6 @@ class StateOperationsUnitTests(test_utils.GenericTestBase):
 
 class HtmlCollectionTests(test_utils.GenericTestBase):
     """Test method to obtain all html strings."""
-
     def test_all_html_strings_are_collected(self):
 
         exploration = exp_domain.Exploration.create_default_exploration(
@@ -7328,7 +7539,7 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
 
         state1.update_interaction_solution(solution_dict1)
 
-        answer_group_list2 = [{
+        answer_groups_list2 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': 0}
@@ -7368,7 +7579,7 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        answer_group_list3 = [{
+        answer_groups_list3 = [{
             'rule_specs': [{
                 'rule_type': 'Equals',
                 'inputs': {'x': [
@@ -7394,8 +7605,16 @@ class HtmlCollectionTests(test_utils.GenericTestBase):
             'training_data': [],
             'tagged_skill_misconception_id': None
         }]
-        state2.update_interaction_answer_groups(answer_group_list2)
-        state3.update_interaction_answer_groups(answer_group_list3)
+        answer_group_objects_list2 = []
+        answer_group_objects_list3 = []
+        for answer_group_dict in answer_groups_list2:
+            answer_group_objects_list2.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        for answer_group_dict in answer_groups_list3:
+            answer_group_objects_list3.append(
+                state_domain.AnswerGroup.from_dict(answer_group_dict))
+        state2.update_interaction_answer_groups(answer_group_objects_list2)
+        state3.update_interaction_answer_groups(answer_group_objects_list3)
 
         expected_html_list = [
             '',

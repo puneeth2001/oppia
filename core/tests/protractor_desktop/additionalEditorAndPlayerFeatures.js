@@ -367,7 +367,7 @@ describe('Full exploration editor', function() {
     explorationEditorMainTab.setContent(forms.toRichText('this is card 1'));
     explorationEditorMainTab.setInteraction('NumericInput');
     explorationEditorMainTab.addResponse(
-      'NumericInput', null, 'final card', true, 'Equals', 21);
+      'NumericInput', null, 'final card',true, 'Equals', 21);
     explorationEditorMainTab.getResponseEditor(0).setDestination(
       'card 2', true, null);
 
