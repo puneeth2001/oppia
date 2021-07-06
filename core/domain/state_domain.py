@@ -1636,11 +1636,11 @@ class State(python_utils.OBJECT):
         self._update_content_ids_in_assets(
             old_content_id_list, new_content_id_list)
 
-    def update_interaction_default_outcome(self, default_outcome_dict):
+    def update_interaction_default_outcome(self, default_outcome):
         """Update the default_outcome of InteractionInstance domain object.
 
         Args:
-            default_outcome_dict: dict. Dict that represents Outcome domain
+            default_outcome: Outcome. object that represents Outcome domain
                 object.
         """
         old_content_id_list = []
@@ -1649,13 +1649,12 @@ class State(python_utils.OBJECT):
             old_content_id_list.append(
                 self.interaction.default_outcome.feedback.content_id)
 
-        if default_outcome_dict:
-            if not isinstance(default_outcome_dict, dict):
+        if default_outcome:
+            if not isinstance(default_outcome, Outcome):
                 raise Exception(
-                    'Expected default_outcome_dict to be a dict, received %s'
-                    % default_outcome_dict)
-            self.interaction.default_outcome = Outcome.from_dict(
-                default_outcome_dict)
+                    'Expected default_outcome to be an Outcome object,'
+                    ' received %s' % default_outcome)
+            self.interaction.default_outcome = default_outcome
             new_content_id_list.append(
                 self.interaction.default_outcome.feedback.content_id)
         else:
